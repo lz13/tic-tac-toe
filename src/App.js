@@ -80,10 +80,8 @@ export default function Game() {
 
   // AI
   useEffect(() => {
-    // console.log("AI Turn:", { isAI, xIsNext, winner, isDraw });
     if (isAI && !xIsNext && !winner && !isDraw) {
       const aiMove = getAIMove(currentSquares);
-      // console.log("AI Move:", aiMove);
       if (aiMove !== -1) {
         handlePlay(currentSquares.map((square, idx) => idx === aiMove ? "O" : square));
       }
@@ -91,12 +89,57 @@ export default function Game() {
   }, [xIsNext, isAI, currentSquares, winner, isDraw]);
 
   function getAIMove(squares) {
-    const emptySquares = squares.map((sq, idx) => (sq === null ? idx : null)).filter(idx => idx !== null);
-    if (emptySquares.length > 0) {
-      const randomIndex = Math.floor(Math.random() * emptySquares.length);
-      return emptySquares[randomIndex];
+    // const emptySquares = squares.map((sq, idx) => (sq === null ? idx : null)).filter(idx => idx !== null);
+    // if (emptySquares.length > 0) {
+    //   const randomIndex = Math.floor(Math.random() * emptySquares.length);
+    //   return emptySquares[randomIndex];
+    // }
+    // return -1;
+
+    // Minimax algorithm to choose the best move
+    const availableMoves = squares.map((sq, idx) => (sq === null ? idx : null)).filter(idx => idx !== null);
+
+    let bestMove = -1;
+    let bestScore = -Infinity;
+
+    for (const move of availableMoves) {
+      const newSquares = squares.slice();
+      newSquares[move] = 'O';
+      const score = minimax(newSquares, false);
+      if (score > bestScore) {
+        bestScore = score;
+        bestMove = move;
+      }
     }
-    return -1;
+    return bestMove;
+  }
+
+  function minimax(squares, isMaximizing) {
+    const { winner } = calculateWinner(squares);
+    if (winner === 'O') return 10;
+    if (winner === 'X') return -10;
+    if (squares.every(square => square !== null)) return 0;
+
+    const availableMoves = squares.map((sq, idx) => (sq === null ? idx : null)).filter(idx => idx !== null);
+    if (isMaximizing) {
+      let bestScore = -Infinity;
+      for (const move of availableMoves) {
+        const newSquares = squares.slice();
+        newSquares[move] = 'O';
+        const score = minimax(newSquares, false);
+        bestScore = Math.max(score, bestScore);
+      }
+      return bestScore;
+    } else {
+      let bestScore = Infinity;
+      for (const move of availableMoves) {
+        const newSquares = squares.slice();
+        newSquares[move] = 'X';
+        const score = minimax(newSquares, true);
+        bestScore = Math.min(score, bestScore);
+      }
+      return bestScore;
+    }
   }
 
   function handlePlay(nextSquares) {
