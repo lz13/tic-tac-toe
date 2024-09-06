@@ -1,4 +1,5 @@
 import { useState } from "react";
+import PlayerModal from "./PlayerModal";
 
 function Square({ value, onSquareClick }) {
   return (
@@ -8,7 +9,15 @@ function Square({ value, onSquareClick }) {
   );
 }
 
-function Board({ xIsNext, squares, onPlay }) {
+function Board({ xIsNext, squares, onPlay, playerX, playerO }) {
+  const winner = calculateWinner(squares);
+  let status;
+  if (winner) {
+    status = `Winner: ${winner === 'X' ? playerX : playerO}`;
+  } else {
+    status = `Next player: ${xIsNext ? playerX : playerO}`;
+  }
+
   function handleClick(i) {
     if (calculateWinner(squares) || squares[i]) {
       return;
@@ -21,14 +30,6 @@ function Board({ xIsNext, squares, onPlay }) {
       nextSquares[i] = 'O';
     }
     onPlay(nextSquares);
-  }
-
-  const winner = calculateWinner(squares);
-  let status;
-  if (winner) {
-    status = 'Winner: ' + winner;
-  } else {
-    status = 'Next player: ' + (xIsNext ? 'X' : 'O');
   }
 
   return (
@@ -56,7 +57,12 @@ function Board({ xIsNext, squares, onPlay }) {
 export default function Game() {
   const [history, setHistory] = useState([Array(9).fill(null)]);
   const [currentMove, setCurrentMove] = useState(0);
-  const xIsNext = currentMove % 2 === 0;
+  const [playerX, setPlayerX] = useState(""); // Track Player X name
+  const [playerO, setPlayerO] = useState(""); // Track player O name
+  const [isModalOpen, setIsModalOpen] = useState(true);
+  const [startingPlayer, setStartingPlayer] = useState("X"); // Track who goes first
+
+  const xIsNext = currentMove % 2 === 0 ? startingPlayer === "X" : startingPlayer === "O";
   const currentSquares = history[currentMove];
 
   function handlePlay(nextSquares) {
@@ -67,6 +73,13 @@ export default function Game() {
 
   function jumpTo(nextMove) {
     setCurrentMove(nextMove);
+  }
+
+  function handlePlayerSubmit(playerX, playerO, startingPlayer) {
+    setPlayerX(playerX);
+    setPlayerO(playerO);
+    setStartingPlayer(startingPlayer);
+    setIsModalOpen(false);
   }
 
   const moves = history.map((squares, move) => {
@@ -85,8 +98,18 @@ export default function Game() {
 
   return (
     <div className="game">
+      {isModalOpen && (
+        <PlayerModal onSubmit={handlePlayerSubmit} />
+      )}
+
       <div className="game-board">
-        <Board xIsNext={xIsNext} squares={currentSquares} onPlay={handlePlay} />
+        <Board
+          xIsNext={xIsNext}
+          squares={currentSquares}
+          onPlay={handlePlay}
+          playerX={playerX}
+          playerO={playerO}
+        />
       </div>
       <div className="game-info">
         <ol>{moves}</ol>

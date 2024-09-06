@@ -11,9 +11,9 @@
   "dependencies": {
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
+    "react-modal": "^3.16.1",
     "react-scripts": "^5.0.0"
   },
-  "devDependencies": {},
   "browserslist": [
     ">0.2%",
     "not dead",
