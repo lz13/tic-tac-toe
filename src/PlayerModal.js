@@ -18,10 +18,11 @@ export default function PlayerModal({ onSubmit }) {
   const [playerX, setPlayerX] = useState('');
   const [playerO, setPlayerO] = useState('');
   const [startingPlayer, setStartingPlayer] = useState('X');
+  const [isAI, setIsAI] = useState(false);
 
   function handleFormSubmit(event) {
     event.preventDefault();
-    onSubmit(playerX, playerO, startingPlayer);
+    onSubmit(playerX, isAI ? "AI" : playerO, startingPlayer, isAI);
   }
 
   return (
@@ -46,14 +47,23 @@ export default function PlayerModal({ onSubmit }) {
         </div>
         <div>
           <label>
-            Player O Name:
-            <input
-              type="text"
-              value={playerO}
-              onChange={(e) => setPlayerO(e.target.value)}
-              required
-            />
+            Player O:
+            <select value={isAI ? 'AI' : 'Human'} onChange={(e) => setIsAI(e.target.value === 'AI')}>
+              <option value="Human">Human</option>
+              <option value="AI">AI</option>
+            </select>
           </label>
+          {isAI ? null : (
+            <label>
+              Player O Name:
+              <input
+                type="text"
+                value={playerO}
+                onChange={(e) => setPlayerO(e.target.value)}
+                required
+              />
+            </label>
+          )}
         </div>
         <div>
           <label>
@@ -69,6 +79,6 @@ export default function PlayerModal({ onSubmit }) {
         </div>
         <button type="submit">Start Game!</button>
       </form>
-    </Modal>
+    </Modal >
   );
 }

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import PlayerModal from "./PlayerModal";
 
 function Square({ value, onSquareClick }) {
@@ -61,9 +61,29 @@ export default function Game() {
   const [playerO, setPlayerO] = useState(""); // Track player O name
   const [isModalOpen, setIsModalOpen] = useState(true);
   const [startingPlayer, setStartingPlayer] = useState("X"); // Track who goes first
+  const [isAI, setIsAI] = useState(false);
 
   const xIsNext = currentMove % 2 === 0 ? startingPlayer === "X" : startingPlayer === "O";
   const currentSquares = history[currentMove];
+
+  // AI
+  useEffect(() => {
+    if (isAI && !xIsNext && !calculateWinner(currentSquares)) {
+      const aiMove = getAIMove(currentSquares);
+      if (aiMove !== -1) {
+        handlePlay(currentSquares.map((square, idx) => idx === aiMove ? "O" : square));
+      }
+    }
+  }, [xIsNext, isAI, currentSquares]);
+
+  function getAIMove(squares) {
+    const emptySquares = squares.map((sq, idx) => (sq === null ? idx : null)).filter(idx => idx !== null);
+    if (emptySquares.length > 0) {
+      const randomIndex = Math.floor(Math.random() * emptySquares.length);
+      return emptySquares[randomIndex] // Randomly select an empty square
+    }
+    return -1;
+  }
 
   function handlePlay(nextSquares) {
     const nextHistory = [...history.slice(0, currentMove + 1), nextSquares];
@@ -75,9 +95,10 @@ export default function Game() {
     setCurrentMove(nextMove);
   }
 
-  function handlePlayerSubmit(playerX, playerO, startingPlayer) {
+  function handlePlayerSubmit(playerX, playerO, startingPlayer, isAI) {
     setPlayerX(playerX);
     setPlayerO(playerO);
+    setIsAI(isAI);
     setStartingPlayer(startingPlayer);
     setIsModalOpen(false);
   }
